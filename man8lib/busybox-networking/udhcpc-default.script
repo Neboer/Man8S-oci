@@ -1,0 +1,52 @@
+#!/bin/sh
+
+# udhcpc script example
+
+# Define the path to resolv.conf
+RESOLV_CONF="/etc/resolv.conf"
+
+# Check if called from udhcpc
+[ -z "$1" ] && echo "Error: should be called from udhcpc" && exit 1
+
+case "$1" in
+    deconfig)
+        # Interface is being deconfigured
+        /bin/ifconfig "$interface" 0.0.0.0
+        # Optional: Remove default routes, clear resolv.conf
+        ;;
+
+    renew|bound)
+        # Lease renewed or bound
+        [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
+        [ -n "$subnet" ] && NETMASK="netmask $subnet"
+
+        /bin/ifconfig "$interface" "$ip" $BROADCAST $NETMASK
+
+        # Configure default gateway
+        if [ -n "$router" ]; then
+            echo "Deleting old routers..."
+            # Remove existing default routes for this interface
+            while route del default gw 0.0.0.0 dev "$interface"; do :; done
+
+            echo "Adding new default routers..."
+            metric=0
+            for i in $router; do
+                route add default gw "$i" dev "$interface" metric $((metric++))
+            done
+        fi
+
+        # Configure DNS servers
+        echo -n > "$RESOLV_CONF"
+        [ -n "$domain" ] && echo "search $domain" >> "$RESOLV_CONF"
+        for i in $dns; do
+            echo "Adding DNS server $i"
+            echo "nameserver $i" >> "$RESOLV_CONF"
+        done
+        ;;
+
+    *)
+        echo "Unknown udhcpc action: $1"
+        ;;
+esac
+
+exit 0
