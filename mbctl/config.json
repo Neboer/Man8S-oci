@@ -1,0 +1,7 @@
+{
+    "rootfs_path": "/var/lib/man8machines",
+    "http-proxy": "",
+    "networking": {
+        "bridge": "mbsrv0"
+    }
+}

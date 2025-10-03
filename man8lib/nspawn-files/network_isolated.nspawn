@@ -10,7 +10,7 @@ PrivateUsers=pick
 
 [Network]
 VirtualEthernet=yes
-Bridge=srvgrp0
+Bridge=mbsrv0
 #Port=tcp:9000:8000
 
 [Files]

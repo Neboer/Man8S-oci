@@ -1,0 +1,51 @@
+# nspawn 文件是有重复键值的ini文件。它的重复键值只针对environment字段，因此是可以处理的。
+
+import configparser
+import io
+
+class NspawnConfigParser(configparser.ConfigParser):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.environment_key_count = 0  # 用于跟踪Environment键的数量
+        self.optionxform = str # pyright: ignore[reportAttributeAccessIssue]
+
+    def read_nspawn_config_string(self, string, source='<string>'):
+        """Read configuration from a given string."""
+        # 将原始字符串中的Environment字段变为Environement1, Environment2等
+        splited_string = string.splitlines()
+        self.environment_key_count = 0
+        for i, line in enumerate(splited_string):
+            if line.strip().startswith("Environment="):
+                self.environment_key_count += 1
+                splited_string[i] = f"Environment{self.environment_key_count}=" + line.split("=", 1)[1]
+
+        sfile = io.StringIO("\n".join(splited_string))
+        self.read_file(sfile, source)
+    
+    def add_exec_environment(self, env_key, env_value):
+        """Add an environment variable to the exec section."""
+        env_string = f"{env_key}={env_value}"
+        self.add_exec_environment_string(env_string)
+    
+    def add_exec_environment_string(self, env_string):
+        """Add an environment variable from a string."""
+        self["Exec"][f"Environment{self.environment_key_count}"] = env_string
+        self.environment_key_count += 1
+
+    def write_nspawn_config(self, fp, space_around_delimiters=True):
+        """Write configuration to a file-like object."""
+        output = io.StringIO()
+        self.write(output, space_around_delimiters)
+        content = output.getvalue()
+
+        # 将Environement1, Environement2等还原为Environment
+        splited_content = content.splitlines()
+        for i, line in enumerate(splited_content):
+            if line.strip().startswith("Environment"):
+                key, value = line.split("=", 1)
+                key = key.strip()
+                value = value.strip()
+                if key.startswith("Environment") and key[len("Environment"):].isdigit():
+                    splited_content[i] = f'Environment = "{value}"'
+
+        fp.write("\n".join(splited_content))
