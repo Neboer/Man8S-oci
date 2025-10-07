@@ -49,3 +49,21 @@ sudo cp /usr/lib/man8lib/nspawn-files/example.nspawn /etc/systemd/nspawn/<contai
 `man8pull-oci.sh gcr.io/distroless/nodejs22-debian12:nonroot test-dtl-fs`
 
 用类似的方法可以拉取所有的docker镜像为rootfs。但当然大多数docker镜像并不能直接被nspawn启动，需要额外的修改。本项目提供的man8s-create-distroless就是其中之一。如果遇到网络问题可以直接开代理HTTP_PROXY。
+
+## init系统
+
+安装init系统的方法：
+
+man8lize-container.sh 
+
+init过程总体分如下几步：
+
+必须设置的环境变量：
+- MAN8S_APPLICATION_ARGS ：实际容器中需要执行的启动命令
+- MAN8S_YGGDRASIL_ADDRESS ：容器yggdrasil的地址，注意迁移容器之后迁移配置时需要将此配置也一并。
+
+init步骤如下：
+1. /sbin/busybox-init.sh
+2. /sbin/busybox-autoconfig-networking.sh
+3. /sbin/yggdrasil-config-ipaddr.sh
+4. /sbin/application.sh

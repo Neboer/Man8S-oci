@@ -11,7 +11,8 @@ from typing import Literal
 
 from man8log import logger
 from man8config import config, ContainerTemplate, ContainerTemplateList
-from create_nspawn_file_by_oci_config import get_oci_config, create_nspawn_file_by_oci_config
+from create_nspawn_file_by_oci_config import get_oci_config, create_nspawn_config_by_oci_config
+from configure_nspawn_container_network import get_host_yggdrasil_address_and_subnet, calculate_nspawn_container_ipv6_address
 
 def pull_oci_image(image: str, target: str):
     """
@@ -52,7 +53,15 @@ def create_nspawn_container_from_oci_bundle(oci_bundle_path: str, container_name
 
     oci_config = get_oci_config(os.path.join(oci_bundle_path, "config.json"))
     nspawn_example_path = os.path.join(config["lib_root"], "nspawn-files", f"{container_template}.nspawn")
-    nspawn_config = create_nspawn_file_by_oci_config(oci_config, nspawn_example_path)
+    
+    if container_template == "network_isolated":
+        ygg_address, ygg_subnet = get_host_yggdrasil_address_and_subnet()
+        container_ipv6 = calculate_nspawn_container_ipv6_address(ygg_subnet, container_name)
+        logger.info(f"为容器 {container_name} 分配 Yggdrasil 地址 {container_ipv6}/{ygg_subnet.split('/')[1]}")
+    else:
+        container_ipv6 = ""
+
+    nspawn_config = create_nspawn_config_by_oci_config(oci_config, nspawn_example_path, container_ipv6)
     nspawn_target_path = os.path.join(config["nspawn_file_path"], f"{container_name}.nspawn")
     with open(nspawn_target_path, "w") as f:
         nspawn_config.write_nspawn_config(f)

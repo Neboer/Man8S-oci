@@ -34,6 +34,19 @@ def calculate_nspawn_container_ipv6_address(prefix: str, container_name: str) ->
     ipv6_addr = ipaddress.IPv6Address(ipv6_int)
     return str(ipv6_addr)
 
+# return addr, subnet
+def get_host_yggdrasil_address_and_subnet() -> tuple[str, str]:
+    """
+    获取宿主机的 Yggdrasil IPv6 地址。
+    假设宿主机已经配置并运行了 Yggdrasil。
+    """
+    import subprocess
+    result = subprocess.run(["yggdrasilctl", "getself"], capture_output=True, text=True)
+    if result.returncode != 0:
+        raise RuntimeError("无法获取 Yggdrasil 地址，请确保 Yggdrasil 已正确安装和运行。")
+    ygg_info = {line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip() for line in result.stdout.splitlines()}
+    return ygg_info["IPv6 address"], ygg_info["IPv6 subnet"]
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calculate nspawn container IPv6 address.")
     parser.add_argument("prefix", help="IPv6 prefix, e.g. '2001:db8:1:2::/64'")

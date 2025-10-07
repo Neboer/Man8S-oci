@@ -1,4 +1,5 @@
 #!/bin/sh
+source /sbin/busybox-execute.sh
 
 # udhcpc script example
 
@@ -11,7 +12,7 @@ RESOLV_CONF="/etc/resolv.conf"
 case "$1" in
     deconfig)
         # Interface is being deconfigured
-        /bin/ifconfig "$interface" 0.0.0.0
+        $BUSYBOX_RUN ifconfig "$interface" 0.0.0.0
         # Optional: Remove default routes, clear resolv.conf
         ;;
 
@@ -20,7 +21,7 @@ case "$1" in
         [ -n "$broadcast" ] && BROADCAST="broadcast $broadcast"
         [ -n "$subnet" ] && NETMASK="netmask $subnet"
 
-        /bin/ifconfig "$interface" "$ip" $BROADCAST $NETMASK
+        $BUSYBOX_RUN ifconfig "$interface" "$ip" $BROADCAST $NETMASK
 
         # Configure default gateway
         if [ -n "$router" ]; then
