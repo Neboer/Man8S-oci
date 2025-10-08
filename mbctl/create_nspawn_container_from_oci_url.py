@@ -47,8 +47,8 @@ def create_nspawn_container_from_oci_bundle(oci_bundle_path: str, container_name
     """
     使用解包好的 OCI 镜像创建 nspawn 容器。
     """
-    rootfs_path = os.path.join(config["rootfs_path"], container_name)
-    if os.path.exists(rootfs_path):
+    container_root_install_destination = os.path.join(config["man8machines_path"], container_name)
+    if os.path.exists(container_root_install_destination):
         raise FileExistsError(f"容器 {container_name} 已存在")
 
     oci_config = get_oci_config(os.path.join(oci_bundle_path, "config.json"))
@@ -62,19 +62,22 @@ def create_nspawn_container_from_oci_bundle(oci_bundle_path: str, container_name
         container_ipv6 = ""
 
     nspawn_config = create_nspawn_config_by_oci_config(oci_config, nspawn_example_path, container_ipv6)
-    nspawn_target_path = os.path.join(config["nspawn_file_path"], f"{container_name}.nspawn")
-    with open(nspawn_target_path, "w") as f:
+    target_container_nspawn_file_path = os.path.join(config["nspawn_file_path"], f"{container_name}.nspawn")
+    with open(target_container_nspawn_file_path, "w") as f:
         nspawn_config.write_nspawn_config(f)
  
-    logger.info(f"nspawn 配置文件已写入 {nspawn_target_path}")
+    logger.info(f"nspawn 配置文件已写入 {target_container_nspawn_file_path}")
 
-    shutil.move(os.path.join(oci_bundle_path, "rootfs"), rootfs_path)
+    shutil.move(os.path.join(oci_bundle_path, "rootfs"), container_root_install_destination)
 
-    logger.info(f"容器 {container_name} 创建完成，根文件系统位于 {rootfs_path}")
+    # 执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
+    subprocess.run(["man8s-add-initsystem", container_root_install_destination])
 
-    os.symlink(rootfs_path, os.path.join(config["system_machines_path"], container_name))
+    logger.info(f"容器 {container_name} 创建完成，根文件系统位于 {container_root_install_destination}")
 
-if __name__ == "__main__":
+    os.symlink(container_root_install_destination, os.path.join(config["system_machines_path"], container_name))
+
+def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="从OCI镜像URL创建nspawn容器")
@@ -95,3 +98,6 @@ if __name__ == "__main__":
     with tempfile.TemporaryDirectory(prefix="oci-unpack.", dir=config["temp_dir"]) as tmpdir:
         pull_oci_image(args.image, tmpdir)
         create_nspawn_container_from_oci_bundle(tmpdir, args.container_name, args.template)
+
+if __name__ == "__main__":
+    main()

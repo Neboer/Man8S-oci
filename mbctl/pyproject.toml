@@ -1,0 +1,12 @@
+[project]
+name = "mbctl"
+version = "0.1.0"
+description = "Container tools for nspawn management"
+authors = [
+    { name = "Neboer", email = "rubinposter@gmail.com" }
+]
+dependencies = []
+
+[project.scripts]
+man8s-create-from-oci = "create_nspawn_container_from_oci_url.main"
+man8s-get-ygg-addr = "configure_nspawn_container_network.main"

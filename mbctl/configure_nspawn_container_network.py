@@ -47,10 +47,13 @@ def get_host_yggdrasil_address_and_subnet() -> tuple[str, str]:
     ygg_info = {line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip() for line in result.stdout.splitlines()}
     return ygg_info["IPv6 address"], ygg_info["IPv6 subnet"]
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Calculate nspawn container IPv6 address.")
     parser.add_argument("prefix", help="IPv6 prefix, e.g. '2001:db8:1:2::/64'")
     parser.add_argument("container_name", help="Container name, e.g. 'mycontainer'")
     args = parser.parse_args()
 
     print(calculate_nspawn_container_ipv6_address(args.prefix, args.container_name))
+
+if __name__ == "__main__":
+    main()

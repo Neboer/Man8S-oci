@@ -4,41 +4,34 @@
 
 ## 安装方法
 
+Man8S环境有所变化，在安装此软件之前，需要做一切必要的准备。
+
+在archlinux中安装如下软件：
+```bash
+pacman -S python yggdrasil skopeo umoci busybox
+```
+
+1. 基础环境: systemd-networkd，nspawn，python
+2. 安装软件：skopeo、umoci
+3. yggdrasil安装
+4. 将50-mbsrv0.network/netdev安装到systemd-networkd配置中并完成此配置
+5. 安装必需依赖：busybox 二进制可执行文件（静态链接）到 /usr/bin/busybox
+
+其中，本软件的makefile已经将4完成了，并且自动将mbctl工具安装进系统中。
+
+
 克隆仓库， `sudo make install`
 
 ## 使用方法
 
 执行  `sudo -E man8s-create-distroless.sh nodejs24-debian12 DTLTest1`
-执行后， /var/lib/machines/DTLTest1 下会生成完整的容器镜像
-支持的镜像有：
-- static-debian12
-- base-debian12
-- base-nossl-debian12
-- cc-debian12
-- python3-debian12
-- java-base-debian12
-- java17-debian12
-- java21-debian12
-- nodejs20-debian12
-- nodejs22-debian12
-- nodejs24-debian12
 
-我们会将这些镜像变为rootfs存储进指定文件夹。
 
 ## 镜像配置
 
 在拉取指定的容器之后……
 
-配置nspawn，并做出对应的修改，注意目前仅支持网络隔离。
-```bash
-sudo cp /usr/lib/man8lib/nspawn-files/example.nspawn /etc/systemd/nspawn/<container_name>.nspawn
-```
 
-将你的应用环境放进 `/var/lib/machines/<container_name>/` 下
-
-然后编写 `/var/lib/machines/<container_name>/sbin/application.sh` ，在里面写上容器启动后要执行的命令。
-
-一切准备就绪， machinectl start <container_name>。
 
 ## 容器调试
 
