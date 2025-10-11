@@ -1,6 +1,6 @@
 # Man8S-distroless
 
-一种新的Man8S容器，与docker兼容（实验性）
+一种基于systemd-nspawn实现的、支持网络隔离和现代网络栈的容器运行时方案，兼容OCI与Docker。
 
 ## 安装方法
 
@@ -11,13 +11,16 @@ Man8S环境有所变化，在安装此软件之前，需要做一切必要的准
 pacman -S python yggdrasil skopeo umoci busybox python-pip
 ```
 
+本软件不只有一个独立的可执行程序，它需要配合其他模块一起工作。本软件的依赖及配置方法如下：
+
 1. 基础环境: systemd-networkd，nspawn，python，python-pip，注意pip需要换源。
 2. 安装软件：skopeo、umoci
-3. yggdrasil安装
-4. 将50-mbsrv0.network/netdev安装到systemd-networkd配置中并完成此配置
-5. 安装必需依赖：busybox 二进制可执行文件（静态链接）到 /usr/bin/busybox
+3. yggdrasil安装并配置
+4. 将systemd-configs文件夹中的.network/netdev文件安装到systemd-networkd配置中
+5. 然后编辑.network文件，将容器的300开头的、带/64的子网其中一个地址分配给网桥（如srvgrp0），比如 `Address=300:2e98:a4b0:1789::1/64`，networkctl重启网络。
+6. 安装必需依赖：busybox 二进制可执行文件（静态链接）到 /usr/bin/busybox
 
-其中，本软件的makefile已经将4完成了，并且自动将mbctl工具安装进系统中。
+其中，本软件会自动将mbctl工具安装进系统中，以上步骤需要自己配置。
 如果你准备重新安装mbctl这个Python模块而不是复用已缓存的wheel，可以先卸载再无缓存安装。
 ```bash
 pip uninstall mbctl --break-system-packages
