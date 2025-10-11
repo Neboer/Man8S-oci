@@ -1,0 +1,6 @@
+[NetDev]
+Description = Bridge for Service Group 0
+Name = srvgrp0
+Kind = bridge
+
+[Bridge]

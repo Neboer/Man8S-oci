@@ -3,10 +3,10 @@
 # rootfs的存储路径是 /var/lib/man8machines/<container_name>
 from json import load
 from typing import TypedDict, List, Dict, Any
-import configparser
-from man8config import config
-from nspawn_ini_parser import NspawnConfigParser
 import argparse
+
+from .man8config import config
+from .nspawn_ini_parser import NspawnConfigParser
 
 class nspawnconfig(TypedDict):
     process: Dict[str, Any]  # 包含 user, args, env, cwd 等

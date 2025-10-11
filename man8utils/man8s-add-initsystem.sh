@@ -9,8 +9,8 @@ mkdir -p ${MACHINE_PATH}/bin
 if [ ! -e "${MACHINE_PATH}/bin/sh" ]; then
     ln -s busybox "${MACHINE_PATH}/bin/sh"
 fi
-cp ${HOST_BUSYBOX} ${MACHINE_PATH}/bin/busybox
+cp -a ${HOST_BUSYBOX} ${MACHINE_PATH}/bin/busybox
 
 # 安装Man8s-busybox-networkinit工具
-cp ${LIBRARY_DIR}/busybox-init/* ${MACHINE_PATH}/sbin/
+cp -a ${LIBRARY_DIR}/busybox-init/* ${MACHINE_PATH}/sbin/
 install -D ${LIBRARY_DIR}/busybox-networking/udhcpc-default.script ${MACHINE_PATH}/usr/share/udhcpc/default.script

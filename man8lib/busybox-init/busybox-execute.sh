@@ -7,5 +7,5 @@ if [ ! -x "$BUSYBOX_LOCATION" ]; then
 fi
 # execute busybox with all parameters
 function BUSYBOX_RUN() {
-    exec "$BUSYBOX_LOCATION" "$@"
+    "$BUSYBOX_LOCATION" "$@"
 }

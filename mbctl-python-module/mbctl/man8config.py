@@ -12,7 +12,7 @@ class Man8Config(TypedDict):
 
 
 config = Man8Config(
-    lib_root="/var/lib/man8s",
+    lib_root="/usr/lib/man8lib",
     man8machines_path="/var/lib/man8machines",
     system_machines_path="/var/lib/machines",
     proxy_server="",

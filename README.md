@@ -8,17 +8,22 @@ Man8S环境有所变化，在安装此软件之前，需要做一切必要的准
 
 在archlinux中安装如下软件：
 ```bash
-pacman -S python yggdrasil skopeo umoci busybox
+pacman -S python yggdrasil skopeo umoci busybox python-pip
 ```
 
-1. 基础环境: systemd-networkd，nspawn，python
+1. 基础环境: systemd-networkd，nspawn，python，python-pip，注意pip需要换源。
 2. 安装软件：skopeo、umoci
 3. yggdrasil安装
 4. 将50-mbsrv0.network/netdev安装到systemd-networkd配置中并完成此配置
 5. 安装必需依赖：busybox 二进制可执行文件（静态链接）到 /usr/bin/busybox
 
 其中，本软件的makefile已经将4完成了，并且自动将mbctl工具安装进系统中。
-
+如果你准备重新安装mbctl这个Python模块而不是复用已缓存的wheel，可以先卸载再无缓存安装。
+```bash
+pip uninstall mbctl --break-system-packages
+rm -rf build
+pip install . --no-cache-dir --force-reinstall --break-system-packages
+```
 
 克隆仓库， `sudo make install`
 

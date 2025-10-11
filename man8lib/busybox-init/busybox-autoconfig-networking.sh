@@ -5,7 +5,7 @@
 set -e
 
 # 找出除了 lo 之外的第一个接口
-MAN8S_HOST_IFACE="$(BUSYBOX_RUN ip -o link show | awk -F': ' '{print $2}' | grep -v '^lo$' | sed 's/@.*//' | head -n1)"
+MAN8S_HOST_IFACE="$(BUSYBOX_RUN ip -o link show | BUSYBOX_RUN awk -F': ' '{print $2}' | BUSYBOX_RUN grep -v '^lo$' | BUSYBOX_RUN sed 's/@.*//' | BUSYBOX_RUN head -n1)"
 
 export MAN8S_HOST_IFACE
 

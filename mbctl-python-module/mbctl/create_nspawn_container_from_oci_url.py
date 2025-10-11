@@ -1,7 +1,6 @@
 # 从OCI镜像URL创建nspawn容器
 
 from enum import Enum
-import logging
 import os
 import shutil
 import subprocess
@@ -9,10 +8,10 @@ import tempfile
 
 from typing import Literal
 
-from man8log import logger
-from man8config import config, ContainerTemplate, ContainerTemplateList
-from create_nspawn_file_by_oci_config import get_oci_config, create_nspawn_config_by_oci_config
-from configure_nspawn_container_network import get_host_yggdrasil_address_and_subnet, calculate_nspawn_container_ipv6_address
+from .man8log import logger
+from .man8config import config, ContainerTemplate, ContainerTemplateList
+from .create_nspawn_file_by_oci_config import get_oci_config, create_nspawn_config_by_oci_config
+from .configure_nspawn_container_network import get_host_yggdrasil_address_and_subnet, calculate_nspawn_container_ipv6_address
 
 def pull_oci_image(image: str, target: str):
     """
@@ -71,7 +70,7 @@ def create_nspawn_container_from_oci_bundle(oci_bundle_path: str, container_name
     shutil.move(os.path.join(oci_bundle_path, "rootfs"), container_root_install_destination)
 
     # 执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
-    subprocess.run(["man8s-add-initsystem", container_root_install_destination])
+    subprocess.run(["man8s-add-initsystem.sh", container_root_install_destination])
 
     logger.info(f"容器 {container_name} 创建完成，根文件系统位于 {container_root_install_destination}")
 
