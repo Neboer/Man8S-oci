@@ -8,5 +8,4 @@ authors = [
 dependencies = []
 
 [project.scripts]
-man8s-create-from-oci = "mbctl.create_nspawn_container_from_oci_url:main"
-man8s-get-ygg-addr = "mbctl.configure_nspawn_container_network:main"
+mbctl = "mbctl.main:main"
