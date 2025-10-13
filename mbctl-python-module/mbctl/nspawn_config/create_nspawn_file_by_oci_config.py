@@ -5,7 +5,7 @@ from json import load
 from typing import TypedDict, List, Dict, Any
 import argparse
 
-from .man8config import config
+from mbctl.utils.man8config import config
 from .nspawn_ini_parser import NspawnConfigParser
 
 class nspawnconfig(TypedDict):

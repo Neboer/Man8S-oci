@@ -1,4 +1,6 @@
-# Man8S-distroless
+# Man8S-OCI-tool
+
+Man8S OCI工具，主要命令为mbctl。
 
 一种基于systemd-nspawn实现的、支持网络隔离和现代网络栈的容器运行时方案，兼容OCI与Docker。
 
@@ -21,37 +23,54 @@ pacman -S python yggdrasil skopeo umoci busybox python-pip
 6. 安装必需依赖：busybox 二进制可执行文件（静态链接）到 /usr/bin/busybox
 
 其中，本软件会自动将mbctl工具安装进系统中，以上步骤需要自己配置。
-如果你准备重新安装mbctl这个Python模块而不是复用已缓存的wheel，可以先卸载再无缓存安装。
-```bash
-pip uninstall mbctl --break-system-packages
-rm -rf build
-pip install . --no-cache-dir --force-reinstall --break-system-packages
-```
-
-克隆仓库， `sudo make install`
 
 ## 使用方法
 
-执行  `sudo -E man8s-create-distroless.sh nodejs24-debian12 DTLTest1`
+本工具的主要用法就是mbctl。
 
+- 拉取镜像到本地 nspawn 容器：
+    ```bash
+    mbctl machines pull docker.io/registry Man8Registry
+    ```
+
+- 进入容器 shell：
+    ```bash
+    mbctl machines shell Man8Registry
+    ```
+
+- 删除一个容器：
+    ```bash
+    mbctl machines remove Man8Registry
+    ```
+
+- 计算容器名字的IPv6后缀：
+    ```bash
+    mbctl address getsuffix SomeFutureMachineName
+    ```
 
 ## 镜像配置
 
-在拉取指定的容器之后……
-
+在拉取指定的容器之后，修改对应的nspawn文件即可。
 
 
 ## 容器调试
 
 `sudo man8shell.sh <container_name>` 可以进入正在运行的容器中的shell，可以在里面调查容器。
 
-## 从docker站拉取rootfs
 
-`man8pull-oci.sh gcr.io/distroless/nodejs22-debian12:nonroot test-dtl-fs`
+## 工作原理
 
-用类似的方法可以拉取所有的docker镜像为rootfs。但当然大多数docker镜像并不能直接被nspawn启动，需要额外的修改。本项目提供的man8s-create-distroless就是其中之一。如果遇到网络问题可以直接开代理HTTP_PROXY。
+mbctl 使用 docker、busybox 作为依赖。
 
-## init系统
+### Man8S 固定ygg内网IPv6地址
+
+Man8S的内网地址分为两种：
+- 动态DHCP/SLAAC分配IPv4/IPv6地址
+- 由容器名哈希与主机前缀静态配置的ygg 300:: 地址
+
+其中前者用于容器网络访问，后者用于容器互联。容器中的软件监听在ygg地址上，可以从内网地址访问该容器。
+
+### Man8S busybox init
 
 安装init系统的方法：
 

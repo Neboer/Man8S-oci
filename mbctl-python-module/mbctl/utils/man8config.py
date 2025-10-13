@@ -9,6 +9,7 @@ class Man8Config(TypedDict):
     proxy_server: str
     nspawn_file_path: str
     temp_dir: str
+    host_busybox_path: str
 
 
 config = Man8Config(
@@ -18,6 +19,7 @@ config = Man8Config(
     proxy_server="",
     nspawn_file_path="/etc/systemd/nspawn",
     temp_dir="/var/tmp/man8s",
+    host_busybox_path="/bin/busybox",
 )
 
 ContainerTemplate = Literal["network_isolated"]
