@@ -9,5 +9,8 @@ dependencies = [
     "importlib_resources"
 ]
 
+[tool.setuptools.package-data]
+mbctl = ["resources/*"]
+
 [project.scripts]
 mbctl = "mbctl.main:main"
