@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 from mbctl.utils.man8config import config
-from mbctl.utils.resources import copy_resdir_file_to_target_file
+from mbctl.resources import copy_resdir_file_to_target_file
 
 
 def shell_container(name: str, exec_command: str = "/bin/sh") -> None:

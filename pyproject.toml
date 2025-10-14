@@ -5,12 +5,13 @@ description = "Container tools for nspawn management"
 authors = [
     { name = "Neboer", email = "rubinposter@gmail.com" }
 ]
-dependencies = [
-    "importlib_resources"
-]
+dependencies = []
+
+[tool.setuptools]
+include-package-data = true
 
 [tool.setuptools.package-data]
-mbctl = ["resources/*"]
+"*" = ["*"]
 
 [project.scripts]
 mbctl = "mbctl.main:main"

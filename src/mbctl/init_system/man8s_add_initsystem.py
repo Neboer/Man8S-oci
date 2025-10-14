@@ -21,7 +21,7 @@ from pathlib import Path
 
 from mbctl.utils.man8config import config
 from mbctl.utils.man8log import logger
-from mbctl.utils.resources import copy_resdir_content_to_target_folder, get_file_content_as_str
+from mbctl.resources import copy_resdir_content_to_target_folder, get_file_content_as_str
 
 
 HOST_BUSYBOX = Path(config["host_busybox_path"])

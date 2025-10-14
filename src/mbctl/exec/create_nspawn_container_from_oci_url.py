@@ -19,7 +19,7 @@ from mbctl.init_system.configure_nspawn_container_network import (
     calculate_nspawn_container_ipv6_address,
 )
 from mbctl.init_system.man8s_add_initsystem import install_init_system_to_machine
-from mbctl.utils.resources import get_file_content_as_str
+from mbctl.resources import get_file_content_as_str
 
 
 def pull_oci_image(image: str, target: str):
