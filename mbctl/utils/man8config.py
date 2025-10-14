@@ -3,7 +3,6 @@ from typing import Literal, TypedDict
 
 
 class Man8Config(TypedDict):
-    lib_root: str
     man8machines_path: str
     system_machines_path: str
     proxy_server: str
@@ -13,7 +12,6 @@ class Man8Config(TypedDict):
 
 
 config = Man8Config(
-    lib_root="/usr/lib/man8lib",
     man8machines_path="/var/lib/man8machines",
     system_machines_path="/var/lib/machines",
     proxy_server="",

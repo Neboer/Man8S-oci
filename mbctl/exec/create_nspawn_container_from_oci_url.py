@@ -19,6 +19,7 @@ from mbctl.init_system.configure_nspawn_container_network import (
     calculate_nspawn_container_ipv6_address,
 )
 from mbctl.init_system.man8s_add_initsystem import install_init_system_to_machine
+from mbctl.utils.resources import get_file_content_as_str
 
 
 def pull_oci_image(image: str, target: str):
@@ -64,8 +65,8 @@ def create_nspawn_container_from_oci_bundle(
         raise FileExistsError(f"容器 {container_name} 已存在")
 
     oci_config = get_oci_config(os.path.join(oci_bundle_path, "config.json"))
-    nspawn_example_path = os.path.join(
-        config["lib_root"], "nspawn-files", f"{container_template}.nspawn"
+    nspawn_example_config_content = get_file_content_as_str(
+        "mbctl.resources.nspawn-files", f"{container_template}.nspawn"
     )
 
     if container_template == "network_isolated":
@@ -80,7 +81,7 @@ def create_nspawn_container_from_oci_bundle(
         container_ipv6 = ""
 
     nspawn_config = create_nspawn_config_by_oci_config(
-        oci_config, nspawn_example_path, container_ipv6
+        oci_config, nspawn_example_config_content, container_ipv6
     )
     target_container_nspawn_file_path = os.path.join(
         config["nspawn_file_path"], f"{container_name}.nspawn"

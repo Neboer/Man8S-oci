@@ -1,11 +1,13 @@
 [project]
 name = "mbctl"
-version = "0.2.0"
+version = "0.2.1"
 description = "Container tools for nspawn management"
 authors = [
     { name = "Neboer", email = "rubinposter@gmail.com" }
 ]
-dependencies = []
+dependencies = [
+    "importlib_resources"
+]
 
 [project.scripts]
 mbctl = "mbctl.main:main"

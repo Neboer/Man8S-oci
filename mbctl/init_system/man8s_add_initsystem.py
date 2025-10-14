@@ -9,9 +9,6 @@ man8s_add_initsystem.py
 此脚本会将主机的 busybox 复制到 <MACHINE_PATH>/bin，确保存在指向 busybox 的 `sh` 链接，
 将 man8lib 的 busybox init 脚本复制到 <MACHINE_PATH>/sbin，并将 udhcpc 的默认脚本安装到
 <MACHINE_PATH>/usr/share/udhcpc/default.script。
-
-说明：
-- 本脚本尽量匹配原始 bash 脚本的行为。它会进行安全检查并在文件缺失或权限问题时抛出有用的错误。
 """
 
 from __future__ import annotations
@@ -24,9 +21,10 @@ from pathlib import Path
 
 from mbctl.utils.man8config import config
 from mbctl.utils.man8log import logger
+from mbctl.utils.resources import copy_resdir_content_to_target_folder, get_file_content_as_str
+
 
 HOST_BUSYBOX = Path(config["host_busybox_path"])
-LIBRARY_DIR = Path(config["lib_root"])
 
 def install_init_system_to_machine(machine_path_str: str) -> None:
     machine_path = Path(machine_path_str).resolve()
@@ -62,33 +60,13 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
             # 已有文件（非符号链接）—为避免破坏性修改，保持原状
             pass
     else:
-        # 创建相对符号链接到 busybox
-        try:
-            sh_link.symlink_to("busybox")
-        except OSError:
-            # 在 Windows 或不支持符号链接的文件系统上，作为回退复制文件
-            shutil.copy2(dest_busybox, sh_link)
+        sh_link.symlink_to("busybox")
 
     # 4. 复制 man8lib/busybox-init/* 到 <machine>/sbin
-    busybox_init_dir = LIBRARY_DIR / "busybox-init"
-    if busybox_init_dir.exists() and busybox_init_dir.is_dir():
-        for item in busybox_init_dir.iterdir():
-            if item.is_file():
-                shutil.copy2(item, sbin_dir / item.name)
-                # 确保可执行
-                (sbin_dir / item.name).chmod((sbin_dir / item.name).stat().st_mode | stat.S_IXUSR)
-    else:
-        # 目录不存在则记录警告但继续
-        logger.warning(f"未找到 {busybox_init_dir}，跳过 busybox-init 安装")
+    copy_resdir_content_to_target_folder("mbctl.resources.busybox-init", sbin_dir)
 
     # 5. 安装 udhcpc-default.script
-    udhcpc_src = LIBRARY_DIR / "busybox-networking" / "udhcpc-default.script"
-    if udhcpc_src.exists() and udhcpc_src.is_file():
-        target = udhcpc_target_dir / "default.script"
-        shutil.copy2(udhcpc_src, target)
-        target.chmod(target.stat().st_mode | stat.S_IXUSR)
-    else:
-        logger.warning(f"未找到 {udhcpc_src}，跳过 udhcpc 脚本安装")
+    copy_resdir_content_to_target_folder("mbctl.resources.busybox-networking", udhcpc_target_dir)
 
 
 def main(argv: list[str]) -> int:

@@ -19,10 +19,9 @@ def get_oci_config(oci_config_file: str) -> nspawnconfig:
         oci_config = load(f)
     return oci_config  # 返回整个配置，包含 process 字段
 
-def create_nspawn_config_by_oci_config(oci_config: nspawnconfig, nspawn_example_file_path: str, nspawn_yggdrasil_dir: str) -> NspawnConfigParser:
+def create_nspawn_config_by_oci_config(oci_config: nspawnconfig, nspawn_example_file_content: str, nspawn_yggdrasil_dir: str) -> NspawnConfigParser:
     nspawn_config = NspawnConfigParser()
-    with open(nspawn_example_file_path, "r", encoding="utf-8") as f:
-        nspawn_config.read_nspawn_config_string(f.read(), nspawn_example_file_path)
+    nspawn_config.read_nspawn_config_string(nspawn_example_file_content)
 
     nspawn_config["Exec"]["Parameters"] = "/sbin/busybox-init.sh" # 使用自定义的init脚本
     nspawn_config["Exec"]["WorkingDirectory"] = oci_config["process"].get("cwd", "/")
