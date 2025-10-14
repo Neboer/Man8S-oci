@@ -18,6 +18,7 @@ from mbctl.init_system.configure_nspawn_container_network import (
     get_host_yggdrasil_address_and_subnet,
     calculate_nspawn_container_ipv6_address,
 )
+from mbctl.init_system.man8s_add_initsystem import install_init_system_to_machine
 
 
 def pull_oci_image(image: str, target: str):
@@ -94,7 +95,7 @@ def create_nspawn_container_from_oci_bundle(
     )
 
     # 执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
-    subprocess.run(["man8s-add-initsystem.sh", container_root_install_destination])
+    install_init_system_to_machine(container_root_install_destination)
 
     logger.info(
         f"容器 {container_name} 创建完成，根文件系统位于 {container_root_install_destination}"

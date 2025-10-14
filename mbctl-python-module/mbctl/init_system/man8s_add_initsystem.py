@@ -31,8 +31,8 @@ from mbctl.utils.man8config import config
 HOST_BUSYBOX = Path(config["host_busybox_path"])
 LIBRARY_DIR = Path(config["lib_root"])
 
-def install(machine_path: Path) -> None:
-    machine_path = machine_path.resolve()
+def install_init_system_to_machine(machine_path_str: str) -> None:
+    machine_path = Path(machine_path_str).resolve()
 
     bin_dir = machine_path / "bin"
     sbin_dir = machine_path / "sbin"
@@ -109,7 +109,7 @@ def main(argv: list[str]) -> int:
             return 3
 
     try:
-        install(machine_path)
+        install_init_system_to_machine(machine_path)
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
         return 1
