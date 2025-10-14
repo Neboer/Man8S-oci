@@ -6,6 +6,7 @@ from typing import TypedDict, List, Dict, Any
 import argparse
 
 from mbctl.utils.man8config import config
+from mbctl.utils.shell import args_list_to_command
 from .nspawn_ini_parser import NspawnConfigParser
 
 class nspawnconfig(TypedDict):
@@ -27,7 +28,12 @@ def create_nspawn_config_by_oci_config(oci_config: nspawnconfig, nspawn_example_
     nspawn_config["Exec"]["WorkingDirectory"] = oci_config["process"].get("cwd", "/")
     for env_string in oci_config["process"].get("env", []):
         nspawn_config.add_exec_environment_string(env_string)
-    nspawn_config.add_exec_environment("MAN8S_APPLICATION_ARGS", " ".join(oci_config["process"].get("args", [])))
+    process_args = oci_config["process"].get("args", [])
+    if process_args == []:
+        # 抛出异常：没有启动命令
+        raise ValueError("OCI配置中没有指定启动命令")
+
+    nspawn_config.add_exec_environment("MAN8S_APPLICATION_ARGS", args_list_to_command(process_args))
     nspawn_config.add_exec_environment("MAN8S_YGGDRASIL_ADDRESS", nspawn_yggdrasil_dir)
     return nspawn_config
 
