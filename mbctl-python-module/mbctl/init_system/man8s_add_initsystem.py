@@ -2,20 +2,16 @@
 """
 man8s_add_initsystem.py
 
-Python equivalent of man8s-add-initsystem.sh
+相当于 man8s-add-initsystem.sh 的 Python 版本
 
-Usage: python3 man8s_add_initsystem.py <MACHINE_PATH>
+用法: python3 man8s_add_initsystem.py <MACHINE_PATH>
 
-This will copy the host busybox into <MACHINE_PATH>/bin, ensure a
-`sh` symlink to busybox exists, copy man8lib busybox init scripts to
-<MACHINE_PATH>/sbin, and install the udhcpc default script to
-<MACHINE_PATH>/usr/share/udhcpc/default.script.
+此脚本会将主机的 busybox 复制到 <MACHINE_PATH>/bin，确保存在指向 busybox 的 `sh` 链接，
+将 man8lib 的 busybox init 脚本复制到 <MACHINE_PATH>/sbin，并将 udhcpc 的默认脚本安装到
+<MACHINE_PATH>/usr/share/udhcpc/default.script。
 
-Notes:
-- This script attempts to match the behavior of the original bash
-  script. It performs safe checks and will raise informative errors
-  if files are missing or if permissions prevent writing to the target
-  locations.
+说明：
+- 本脚本尽量匹配原始 bash 脚本的行为。它会进行安全检查并在文件缺失或权限问题时抛出有用的错误。
 """
 
 from __future__ import annotations
@@ -27,6 +23,7 @@ import sys
 from pathlib import Path
 
 from mbctl.utils.man8config import config
+from mbctl.utils.man8log import logger
 
 HOST_BUSYBOX = Path(config["host_busybox_path"])
 LIBRARY_DIR = Path(config["lib_root"])
@@ -38,65 +35,65 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
     sbin_dir = machine_path / "sbin"
     udhcpc_target_dir = machine_path / "usr" / "share" / "udhcpc"
 
-    # 1. Ensure destination directories exist
+    # 1. 确保目标目录存在
     for d in (bin_dir, sbin_dir, udhcpc_target_dir):
         d.mkdir(parents=True, exist_ok=True)
 
-    # 2. Copy busybox
+    # 2. 复制 busybox
     if not HOST_BUSYBOX.exists():
-        raise FileNotFoundError(f"Host busybox not found at {HOST_BUSYBOX}")
+        raise FileNotFoundError(f"主机上的 busybox 未找到：{HOST_BUSYBOX}")
 
     dest_busybox = bin_dir / "busybox"
     shutil.copy2(HOST_BUSYBOX, dest_busybox)
-    # keep executable bits
+    # 保留可执行位
     dest_busybox.chmod(dest_busybox.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-    # 3. Ensure /bin/sh symlink to busybox
+    # 3. 确保 /bin/sh 指向 busybox 的符号链接
     sh_link = bin_dir / "sh"
-    # If exists and not a symlink, do not overwrite; else create symlink
+    # 如果存在且不是符号链接，则不覆盖；否则创建符号链接
     if sh_link.exists():
         if sh_link.is_symlink():
-            # update target if necessary
+            # 如有必要，更新目标
             current = os.readlink(sh_link)
             if Path(current).name != "busybox":
                 sh_link.unlink()
                 sh_link.symlink_to("busybox")
         else:
-            # existing file (not symlink) - do nothing to avoid destructive change
+            # 已有文件（非符号链接）—为避免破坏性修改，保持原状
             pass
     else:
-        # create a relative symlink to busybox
+        # 创建相对符号链接到 busybox
         try:
             sh_link.symlink_to("busybox")
         except OSError:
-            # On Windows or filesystems that don't support symlinks, copy as fallback
+            # 在 Windows 或不支持符号链接的文件系统上，作为回退复制文件
             shutil.copy2(dest_busybox, sh_link)
 
-    # 4. Copy man8lib/busybox-init/* to <machine>/sbin
+    # 4. 复制 man8lib/busybox-init/* 到 <machine>/sbin
     busybox_init_dir = LIBRARY_DIR / "busybox-init"
     if busybox_init_dir.exists() and busybox_init_dir.is_dir():
         for item in busybox_init_dir.iterdir():
             if item.is_file():
                 shutil.copy2(item, sbin_dir / item.name)
-                # ensure executable
+                # 确保可执行
                 (sbin_dir / item.name).chmod((sbin_dir / item.name).stat().st_mode | stat.S_IXUSR)
     else:
-        # If the directory doesn't exist, warn but continue
-        print(f"Warning: {busybox_init_dir} not found; skipping busybox-init install", file=sys.stderr)
+        # 目录不存在则记录警告但继续
+        logger.warning(f"未找到 {busybox_init_dir}，跳过 busybox-init 安装")
 
-    # 5. Install udhcpc-default.script
+    # 5. 安装 udhcpc-default.script
     udhcpc_src = LIBRARY_DIR / "busybox-networking" / "udhcpc-default.script"
     if udhcpc_src.exists() and udhcpc_src.is_file():
         target = udhcpc_target_dir / "default.script"
         shutil.copy2(udhcpc_src, target)
         target.chmod(target.stat().st_mode | stat.S_IXUSR)
     else:
-        print(f"Warning: {udhcpc_src} not found; skipping udhcpc script install", file=sys.stderr)
+        logger.warning(f"未找到 {udhcpc_src}，跳过 udhcpc 脚本安装")
 
 
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
-        print("Usage: man8s_add_initsystem.py <MACHINE_PATH>", file=sys.stderr)
+        logger.error("用法: man8s_add_initsystem.py <MACHINE_PATH>")
         return 2
 
     machine_path = argv[1]
@@ -104,7 +101,7 @@ def main(argv: list[str]) -> int:
     try:
         install_init_system_to_machine(machine_path)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        logger.error(f"错误：{e}")
         return 1
 
     return 0

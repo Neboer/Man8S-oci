@@ -1,4 +1,4 @@
-# nspawn 文件是有重复键值的ini文件。它的重复键值只针对environment字段，因此是可以处理的。
+# nspawn 文件是有重复键值的 ini 文件。它的重复键值只针对 Environment 字段，因此可以被特殊处理。
 
 import configparser
 import io
@@ -6,12 +6,15 @@ import io
 class NspawnConfigParser(configparser.ConfigParser):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.environment_key_count = 0  # 用于跟踪Environment键的数量
+        self.environment_key_count = 0  # 用于跟踪 Environment 键的数量
         self.optionxform = str # pyright: ignore[reportAttributeAccessIssue]
 
     def read_nspawn_config_string(self, string, source='<string>'):
-        """Read configuration from a given string."""
-        # 将原始字符串中的Environment字段变为Environement1, Environment2等
+        """从给定字符串中读取配置。
+
+        将原始字符串中的 Environment= 字段重命名为 Environment1=, Environment2= 等，
+        以便 ConfigParser 能够处理多个同名键。
+        """
         splited_string = string.splitlines()
         self.environment_key_count = 0
         for i, line in enumerate(splited_string):
@@ -23,22 +26,26 @@ class NspawnConfigParser(configparser.ConfigParser):
         self.read_file(sfile, source)
     
     def add_exec_environment(self, env_key, env_value):
-        """Add an environment variable to the exec section."""
+        """向 Exec 段添加一个环境变量（以键/值形式）。"""
         env_string = f"{env_key}={env_value}"
         self.add_exec_environment_string(env_string)
     
     def add_exec_environment_string(self, env_string):
-        """Add an environment variable from a string."""
+        """从字符串添加一个环境变量（格式 'KEY=VALUE'）。"""
         self["Exec"][f"Environment{self.environment_key_count}"] = env_string
         self.environment_key_count += 1
 
     def write_nspawn_config(self, fp, space_around_delimiters=True):
-        """Write configuration to a file-like object."""
+        """将配置写入类文件对象。
+
+        在写入时，将 Environment1, Environment2 等键还原为重复的 Environment 字段：
+        输出为 Environment = "KEY=VALUE" 的形式，匹配 nspawn 所期望的格式。
+        """
         output = io.StringIO()
         self.write(output, space_around_delimiters)
         content = output.getvalue()
 
-        # 将Environement1, Environement2等还原为Environment
+        # 将 Environment1, Environment2 等还原为 Environment
         splited_content = content.splitlines()
         for i, line in enumerate(splited_content):
             if line.strip().startswith("Environment"):

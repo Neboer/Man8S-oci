@@ -48,3 +48,12 @@ def remove_container(name: str) -> None:
 
     if deleted:
         logger.info(f"容器 '{name}' 已删除: {', '.join(deleted)}。")
+
+
+def remove_cache_dir() -> None:
+    """删除临时缓存目录"""
+    temp_dir = config["temp_dir"]
+    if check_and_delete(temp_dir):
+        logger.info(f"临时缓存目录 '{temp_dir}' 已删除或不存在。")
+    else:
+        logger.error(f"无法删除临时缓存目录 '{temp_dir}'。")

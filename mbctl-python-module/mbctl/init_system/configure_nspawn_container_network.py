@@ -49,8 +49,8 @@ def get_host_yggdrasil_address_and_subnet() -> tuple[str, str]:
 
 def main():
     parser = argparse.ArgumentParser(description="Calculate nspawn container IPv6 address.")
-    parser.add_argument("prefix", help="IPv6 prefix, e.g. '2001:db8:1:2::/64'")
-    parser.add_argument("container_name", help="Container name, e.g. 'mycontainer'")
+    parser.add_argument("prefix", help="IPv6 前缀, e.g. '2001:db8:1:2::/64'")
+    parser.add_argument("container_name", help="容器名称, e.g. 'mycontainer'")
     args = parser.parse_args()
 
     print(calculate_nspawn_container_ipv6_address(args.prefix, args.container_name))
