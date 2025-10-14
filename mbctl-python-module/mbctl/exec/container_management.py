@@ -50,10 +50,9 @@ def remove_container(name: str) -> None:
         logger.info(f"容器 '{name}' 已删除: {', '.join(deleted)}。")
 
 
-def remove_cache_dir() -> None:
-    """删除临时缓存目录"""
+def clear_cache_dir() -> None:
+    """清理临时缓存目录"""
     temp_dir = config["temp_dir"]
-    if check_and_delete(temp_dir):
-        logger.info(f"临时缓存目录 '{temp_dir}' 已删除或不存在。")
-    else:
-        logger.error(f"无法删除临时缓存目录 '{temp_dir}'。")
+    check_and_delete(temp_dir)
+    os.makedirs(temp_dir, exist_ok=True)
+    logger.info(f"临时缓存目录 '{temp_dir}' 已清理。")

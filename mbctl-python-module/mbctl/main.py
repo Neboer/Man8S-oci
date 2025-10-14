@@ -2,10 +2,11 @@ import argparse
 import sys
 from typing import Optional
 
+from mbctl import __version__
 from mbctl.utils.man8config import config, ContainerTemplate, ContainerTemplateList
 from mbctl.exec.create_nspawn_container_from_oci_url import pull_oci_image_and_create_container
 from mbctl.exec.shell_into_nspawn_container import shell_container
-from mbctl.exec.container_management import remove_container, remove_cache_dir
+from mbctl.exec.container_management import remove_container, clear_cache_dir
 from mbctl.exec.get_suffix_address_of_name import print_ipv6_suffix
 from mbctl.utils.man8log import logger
 
@@ -42,6 +43,8 @@ def build_parser() -> argparse.ArgumentParser:
 	cache_sub = cache.add_subparsers(dest="cache_cmd", required=True)
 	# 清理缓存目录
 	cleancache = cache_sub.add_parser("clear", help="清理临时缓存目录")
+	# 添加顶层 version 子命令用于显示版本
+	version = subparsers.add_parser("version", help="显示 mbctl 版本")
 
 	return parser
 
@@ -69,10 +72,13 @@ def main(argv: Optional[list[str]] = None) -> int:
 			return 2
 	elif args.command_group == "cache":
 		if args.cache_cmd == "clear":
-			remove_cache_dir()
+			clear_cache_dir()
 		else:
 			parser.print_help()
 			return 2
+	elif args.command_group == "version":
+		print(f"mbctl 版本：{__version__}")
+		return 0
 	else:
 		parser.print_help()
 		return 2
