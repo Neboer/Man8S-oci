@@ -68,6 +68,10 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
     # 5. 安装 udhcpc-default.script
     copy_resdir_content_to_target_folder("mbctl.resources.busybox-networking", udhcpc_target_dir)
 
+    # 6. 确保 udhcpc/default.script 、 /sbin/busybox-init.sh 可执行
+    for script in (udhcpc_target_dir / "default.script", sbin_dir / "busybox-init.sh"):
+        script.chmod(script.stat().st_mode | stat.S_IEXEC)
+
 
 def main(argv: list[str]) -> int:
     if len(argv) != 2:
