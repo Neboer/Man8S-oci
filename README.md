@@ -1,6 +1,6 @@
 # Man8S-OCI-tool
 
-Man8S OCI工具，主要命令为mbctl。
+Man8S OCI工具，命令行工具为 mbctl 。
 
 一种基于systemd-nspawn实现的、支持网络隔离和现代网络栈的容器运行时方案，兼容OCI与Docker。
 
@@ -42,6 +42,7 @@ pacman -S python yggdrasil skopeo umoci busybox python-pip
     ```bash
     mbctl machines remove Man8Registry
     ```
+    注意：不要删除运行中的容器。
 
 - 计算容器名字的IPv6后缀：
     ```bash
@@ -52,11 +53,31 @@ pacman -S python yggdrasil skopeo umoci busybox python-pip
 
 在拉取指定的容器之后，修改对应的nspawn文件即可。
 
+```ini
+[Exec]
+Boot = no
+ProcessTwo = yes
+Parameters = /sbin/busybox-init.sh
+ResolvConf = copy-stub
+Timezone = copy
+LinkJournal = no
+PrivateUsers = pick
+WorkingDirectory = /
+Environment = "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment = "TERM=xterm"
+Environment = "HOME=/root"
+Environment = "MAN8S_APPLICATION_ARGS=/bin/sh"
+Environment = "MAN8S_YGGDRASIL_ADDRESS=300:xxx:xxx:xxx:fb2:bb91:2f33:ad7e"
 
-## 容器调试
+[Network]
+VirtualEthernet = yes
+Bridge = srvgrp0
 
-`sudo man8shell.sh <container_name>` 可以进入正在运行的容器中的shell，可以在里面调查容器。
+[Files]
+PrivateUsersOwnership = map
+```
 
+nspawn 配置中的 MAN8S_APPLICATION_ARGS 是实际需要执行的命令，MAN8S_YGGDRASIL_ADDRESS 是容器自动计算出的固定yggdrasil内网ipv6地址。前缀与网桥相同。
 
 ## 工作原理
 

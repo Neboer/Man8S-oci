@@ -2,6 +2,8 @@ from importlib.resources import files
 import shutil
 import os
 
+from mbctl.utils.man8log import logger
+
 def copy_resdir_content_to_target_folder(src_resource_package_name, dst_folder):
     # 将一个资源目录的所有内容递归复制到目标文件夹
     os.makedirs(dst_folder, exist_ok=True)
@@ -13,7 +15,7 @@ def copy_resdir_content_to_target_folder(src_resource_package_name, dst_folder):
         else:
             with entry.open('rb') as fsrc, open(target_path, 'wb') as fdst:
                 shutil.copyfileobj(fsrc, fdst)
-        print(f'Copied {entry} to {target_path}')
+        logger.debug(f'Copied {entry} to {target_path}')
 
 
 def copy_resdir_file_to_target_file(src_resource_package_name, src_resource_name, dst_file_path):
@@ -22,13 +24,12 @@ def copy_resdir_file_to_target_file(src_resource_package_name, src_resource_name
     src_resource = files(src_resource_package_name).joinpath(src_resource_name)
     with src_resource.open('rb') as fsrc, open(dst_file_path, 'wb') as fdst:
         shutil.copyfileobj(fsrc, fdst)
-    print(f'Copied {src_resource} to {dst_file_path}')
+    logger.debug(f'Copied {src_resource} to {dst_file_path}')
 
 
 def get_file_content_as_str(resource_package_name, resource_name):
     # 以字符串形式获取资源文件内容
     resource = files(resource_package_name).joinpath(resource_name)
     with resource.open('r', encoding='utf-8') as f:
+        logger.debug(f'Reading content from {resource}')
         return f.read()
-
-
