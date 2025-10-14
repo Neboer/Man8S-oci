@@ -53,32 +53,23 @@ def main(argv: Optional[list[str]] = None) -> int:
 
 	if args.command_group == "machines":
 		if args.machines_cmd == "pull":
-			logger.info(f"开始将镜像从「{args.source}」拉取到本地容器「{args.name}」，使用模板：{args.template}")
 			pull_oci_image_and_create_container(args.source, args.name, args.template)
-			logger.info(f"完成：容器「{args.name}」已创建/更新（如有必要）。")
 		elif args.machines_cmd == "shell":
-			logger.info(f"为容器「{args.name}」打开命令：{args.command}")
 			shell_container(args.name, args.command)
-			logger.info(f"退出容器「{args.name}」的会话。")
 		elif args.machines_cmd == "remove":
-			logger.info(f"正在删除容器「{args.name}」……")
 			remove_container(args.name)
-			logger.info(f"完成：容器「{args.name}」已删除（如果存在）。")
 		else:
 			parser.print_help()
 			return 2
 	elif args.command_group == "address":
 		if args.address_cmd == "getsuffix":
-			logger.info(f"正在计算容器名称「{args.name}」的 IPv6 后缀……")
 			print_ipv6_suffix(args.name)
 		else:
 			parser.print_help()
 			return 2
 	elif args.command_group == "cache":
 		if args.cache_cmd == "clear":
-			logger.info(f"正在清理缓存目录……")
 			remove_cache_dir()
-			logger.info(f"完成：缓存目录已清理。")
 		else:
 			parser.print_help()
 			return 2
