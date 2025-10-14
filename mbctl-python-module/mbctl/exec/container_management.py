@@ -2,19 +2,24 @@ import shutil
 import os
 from pathlib import Path
 
+from mbctl.utils.man8log import logger
 from mbctl.utils.man8config import config, ContainerTemplate, ContainerTemplateList
 
 
-def check_and_delete(target_dir: str) -> bool:
+def check_and_delete(target: str) -> bool:
     """检查路径是否存在，如果存在则删除，返回是否删除成功"""
 
-    if os.path.exists(target_dir):
+    if os.path.lexists(target):
         try:
-            shutil.rmtree(target_dir)
-            print(f"Existing directory '{target_dir}' removed.")
+            if os.path.isdir(target) and not os.path.islink(target):
+                shutil.rmtree(target)
+                logger.info(f"Existing directory '{target}' removed.")
+            else:
+                os.remove(target)
+                logger.info(f"Existing file or symlink '{target}' removed.")
             return True
         except Exception as e:
-            print(f"Error removing directory '{target_dir}': {e}")
+            logger.error(f"Error removing '{target}': {e}")
             return False
     return True
 
@@ -25,10 +30,21 @@ def remove_container(name: str) -> None:
     container_system_root = Path(config["system_machines_path"]) / name
     container_nspawn_file = Path(config["nspawn_file_path"]) / f"{name}.nspawn"
 
-    for target_path in [
-        container_lib_root,
-        container_system_root,
-        container_nspawn_file,
-    ]:
-        target_path_str = str(target_path)
-        check_and_delete(target_path_str)
+    targets = [
+        ("库目录", container_lib_root),
+        ("系统目录", container_system_root),
+        ("nspawn 文件", container_nspawn_file),
+    ]
+
+    existing = [(desc, p) for desc, p in targets if os.path.lexists(str(p))]
+    if not existing:
+        logger.error(f"容器 '{name}' 不存在。")
+        return
+
+    deleted = []
+    for desc, p in existing:
+        if check_and_delete(str(p)):
+            deleted.append(desc)
+
+    if deleted:
+        logger.info(f"容器 '{name}' 已删除: {', '.join(deleted)}。")

@@ -99,14 +99,7 @@ def main(argv: list[str]) -> int:
         print("Usage: man8s_add_initsystem.py <MACHINE_PATH>", file=sys.stderr)
         return 2
 
-    machine_path = Path(argv[1])
-    if not machine_path.exists():
-        # Try to create the root directory if it doesn't exist
-        try:
-            machine_path.mkdir(parents=True, exist_ok=True)
-        except OSError as e:
-            print(f"Cannot create machine path {machine_path}: {e}", file=sys.stderr)
-            return 3
+    machine_path = argv[1]
 
     try:
         install_init_system_to_machine(machine_path)
