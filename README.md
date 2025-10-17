@@ -30,7 +30,7 @@ pacman -S python yggdrasil skopeo umoci busybox python-pip
 
 - 拉取镜像到本地 nspawn 容器：
     ```bash
-    mbctl machines pull docker.io/registry Man8Registry
+    mbctl machines pull docker.io/registry:latest Man8Registry
     ```
 
 - 进入容器 shell：

@@ -111,6 +111,7 @@ def create_nspawn_container_from_oci_bundle(
 def pull_oci_image_and_create_container(
     image: str, container_name: str, container_template: ContainerTemplate
 ):
+    os.makedirs(config["temp_dir"], exist_ok=True)
     with tempfile.TemporaryDirectory(
         prefix="oci-unpack.", dir=config["temp_dir"]
     ) as tmpdir:
