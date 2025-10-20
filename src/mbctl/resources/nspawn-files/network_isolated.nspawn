@@ -15,5 +15,6 @@ Bridge=srvgrp0
 
 [Files]
 PrivateUsersOwnership=map
+Volatile=overlay
 #Bind=
 #BindReadOnly=

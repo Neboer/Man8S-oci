@@ -4,6 +4,8 @@ from typing import Literal, TypedDict
 
 class Man8Config(TypedDict):
     man8machines_path: str
+    man8machine_configs_path: str
+    man8machine_storage_path: str
     system_machines_path: str
     proxy_server: str
     nspawn_file_path: str
@@ -13,6 +15,8 @@ class Man8Config(TypedDict):
 
 config = Man8Config(
     man8machines_path="/var/lib/man8machines",
+    man8machine_configs_path="/var/lib/man8machine_configs",
+    man8machine_storage_path="/var/lib/man8machine_storage",
     system_machines_path="/var/lib/machines",
     proxy_server="",
     nspawn_file_path="/etc/systemd/nspawn",
