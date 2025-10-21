@@ -1,4 +1,4 @@
-from src.mbctl.yggdrasil_network.configure_nspawn_container_network import string_to_v6suffix
+from mbctl.networking.string_to_v6suffix import string_to_v6suffix
 
 def print_ipv6_suffix(name: str) -> None:
     """

@@ -1,7 +1,5 @@
-from pathlib import Path
 import os
 
-from mbctl.utils.man8config import config
 from mbctl.resources import copy_resdir_file_to_target_file
 
 
