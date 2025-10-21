@@ -25,7 +25,7 @@ class Man8SContainerInfo:
         relative_path = container_abs_path.relative_to("/")
         return self.container_storage_dir / relative_path
 
-    def get_container_storage_path_str(self, container_abs_path: str) -> str:
+    def get_container_storage_path_str(self, container_abs_path: str = "/") -> str:
         return str(self.get_container_storage_path(Path(container_abs_path)))
 
     def get_container_config_path(self, container_abs_path: Path) -> Path:
@@ -33,7 +33,7 @@ class Man8SContainerInfo:
         relative_path = container_abs_path.relative_to("/")
         return self.container_config_dir / relative_path
 
-    def get_container_config_path_str(self, container_abs_path: str) -> str:
+    def get_container_config_path_str(self, container_abs_path: str = "/") -> str:
         return str(self.get_container_config_path(Path(container_abs_path)))
 
     def get_container_man8env_config_path_str(self):

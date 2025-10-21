@@ -108,3 +108,8 @@ init步骤如下：
 2. /sbin/busybox-autoconfig-networking.sh
 3. /sbin/yggdrasil-config-ipaddr.sh
 4. /sbin/application.sh
+
+## 开发计划
+
+- 创建容器
+- 删除容器

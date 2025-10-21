@@ -60,7 +60,24 @@ def pull_oci_image_and_create_container(
     ## 生成 envs 配置文件
     envs_config = generate_env_config_from_configs(oci_config, man8s_container_info)
 
-    # 第四步：写入 nspawn 和 envs 配置文件到对应位置，创建
+    # 第四步：将配置文件中自动生成的容器数据挂载点实际创建出来。
+    all_need_create_dirs = []
+
+    ## 首先，创建容器的存储目录与配置目录
+    all_need_create_dirs.append(man8s_container_info.get_container_config_path_str())
+    all_need_create_dirs.append(man8s_container_info.get_container_storage_path_str())
+
+    ## 其次，将 nspawn 配置文件中的存储挂载点目录创建出来
+    for src_path in nspawn_config.get_all_bind_mount_srcs():
+        if man8s_container_info.check_is_storage_path(src_path):
+            all_need_create_dirs.append(src_path)
+
+    ## 从all_bind_mount_srcs中找出所有man8s storage路径，并创建它们（此时，配置文件路径应该只有 man8env.env 这个文件，需要跳过它）
+    for d in all_need_create_dirs:
+        os.makedirs(d, exist_ok=True)
+        logger.debug(f"已创建挂载点目录 {d}")
+
+    # 第五步：写入 nspawn 和 envs 配置文件到对应位置，创建
     nspawn_config.write_to_file(
         man8s_container_info.get_container_nspawn_file_path_str()
     )
@@ -73,14 +90,6 @@ def pull_oci_image_and_create_container(
     logger.info(
         f"环境变量配置文件已写入 {man8s_container_info.get_container_man8env_config_path_str()}"
     )
-
-    # 第五步：将配置文件中自动生成的容器数据挂载点实际创建出来。
-    all_bind_mount_srcs = nspawn_config.get_all_bind_mount_srcs()
-    ## 从all_bind_mount_srcs中找出所有man8s storage路径，并创建它们（此时，配置文件路径应该只有 man8env.env 这个文件，需要跳过它）
-    for src_path in all_bind_mount_srcs:
-        if man8s_container_info.check_is_storage_path(src_path):
-            os.makedirs(src_path, exist_ok=True)
-            logger.info(f"已创建容器存储挂载点目录 {src_path}")
 
     # 第六步：执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
     install_init_system_to_machine(man8s_container_info.container_dir_str)

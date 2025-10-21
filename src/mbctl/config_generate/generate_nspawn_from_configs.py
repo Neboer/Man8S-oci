@@ -25,9 +25,6 @@ def generate_nspawn_config_from_configs(
     process_args = oci_config.get_process_args()
     if process_args:
         nspawn_config.set_exec_command("/sbin/busybox-init.sh")
-        nspawn_config.add_environment_var(
-            "MAN8S_APPLICATION_ARGS", " ".join(process_args)
-        )
 
     # 设置环境变量。注意nspawn配置中只设置不属于软件配置的环境变量，属于容器配置的环境变量应该写入 config.man8machine_configs_path / man8env.env 中。
     normal_envs = oci_config.get_process_normal_envs()
