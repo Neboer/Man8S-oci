@@ -36,10 +36,7 @@ def generate_nspawn_config_from_configs(
     nspawn_config.set_working_directory(process_cwd)
 
     # 设置挂载点。具体参考README中关于“挂载点”的描述
-    useful_mount_paths = oci_config.get_useful_mount_paths()
-    for mount_path in useful_mount_paths:
-        nspawn_config.add_bind_mount_idmap(
-            man8s_config.get_container_storage_path_str(mount_path), mount_path
-        )
+    for mount_point, mount_target in man8s_config.user_defined_mount_points:
+        nspawn_config.add_bind_mount_idmap(mount_point, mount_target)
 
     return nspawn_config
