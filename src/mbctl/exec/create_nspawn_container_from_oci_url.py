@@ -35,7 +35,8 @@ from mbctl.user_interaction.must_input import must_input_list, must_input_absolu
 # - 跳过：不会挂载这个路径。
 # 注意，所有的这些挂载，都是指路径挂载。Man8S不支持文件挂载，如果要求文件挂载请回答跳过，然后自己编辑nspawn文件创建挂载关系。
 def ask_user_input_mount_target(
-    man8s_container_info: Man8SContainerInfo, mount_point: str
+    man8s_container_info: Man8SContainerInfo,
+    mount_point: str,
 ) -> str | None:
     print(f"容器镜像声明了挂载点 {mount_point} 。")
     print(f"请输入数字选择此挂载点的类型：")
@@ -63,7 +64,10 @@ def ask_user_input_mount_target(
 
 # 主函数，完整流程。从OCI URL创建一个完整的容器。
 def pull_oci_image_and_create_container(
-    oci_image_url: str, container_name: str, container_template: ContainerTemplate
+    oci_image_url: str,
+    container_name: str,
+    container_template: ContainerTemplate,
+    provided_mount_configs: dict = {},
 ):
     # 第一步：创建man8s_config
 
@@ -94,7 +98,12 @@ def pull_oci_image_and_create_container(
     ## 获得所有volume，并打印提示信息，让用户选择这些挂载点的目标。挂载点目标选择的详细文档请参考 config_generate/README.md
     mount_points: list[str] = container_shallow_config["config"]["Volumes"]
     for mount_point in mount_points:
-        mount_target = ask_user_input_mount_target(man8s_container_info, mount_point)
+        if mount_point in provided_mount_configs:
+            mount_target = provided_mount_configs[mount_point]
+        else:
+            mount_target = ask_user_input_mount_target(
+                man8s_container_info, mount_point
+            )
         if mount_target is not None:
             man8s_container_info.add_user_defined_mount_point(mount_point, mount_target)
 
