@@ -18,7 +18,8 @@ def generate_nspawn_config_from_configs(
     # 设置init脚本和man8env.env挂载
     nspawn_config.set_exec_command("/sbin/busybox-init.sh")
     nspawn_config.add_bind_mount_idmap(
-        man8s_config.get_container_man8env_config_path_str(), "/man8env.env"
+        "/man8env.env",
+        man8s_config.get_container_man8env_config_path_str()
     )
 
     # 设置命令行参数
