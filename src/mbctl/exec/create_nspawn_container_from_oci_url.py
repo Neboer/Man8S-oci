@@ -96,7 +96,9 @@ def pull_oci_image_and_create_container(
         oci_image_url
     )
     ## 获得所有volume，并打印提示信息，让用户选择这些挂载点的目标。挂载点目标选择的详细文档请参考 config_generate/README.md
-    mount_points: list[str] = container_shallow_config["config"]["Volumes"]
+    mount_points: list[str] = []
+    if "Volumes" in container_shallow_config["config"]:
+        mount_points = container_shallow_config["config"]["Volumes"]
     for mount_point in mount_points:
         if mount_point in provided_mount_configs:
             mount_target = provided_mount_configs[mount_point]
