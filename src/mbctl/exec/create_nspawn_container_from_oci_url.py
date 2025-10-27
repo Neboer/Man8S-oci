@@ -170,4 +170,8 @@ def pull_oci_image_and_create_container(
     )
 
     # 第八步：对容器rootfs后处理，保护/run和/tmp目录
-    oci_convert_protect_dirs(man8s_container_info.container_dir_str)
+    protect_dir_result = oci_convert_protect_dirs(
+        man8s_container_info.container_dir_str
+    )
+    for dir in protect_dir_result:
+        logger.info(f"已保护容器内目录 {dir} -> {dir}.man8sprotected 。")
