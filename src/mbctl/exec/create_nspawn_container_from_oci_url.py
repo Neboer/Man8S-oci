@@ -26,6 +26,7 @@ from mbctl.resources import get_file_content_as_str
 from mbctl.get_bundle.get_oci import fetch_oci_to_rootfs  # 新增
 from mbctl.get_bundle.get_oci_shallow_config import get_container_shallow_config
 from mbctl.user_interaction.must_input import must_input_list, must_input_absolute_path
+from mbctl.get_bundle.oci_convert import oci_convert_protect_dirs
 
 
 # 交互式询问用户挂载的目标路径，将用户选好的路径添加到 man8s_container_info 中。
@@ -167,3 +168,6 @@ def pull_oci_image_and_create_container(
         man8s_container_info.container_dir_str,
         os.path.join(config["system_machines_path"], container_name),
     )
+
+    # 第八步：对容器rootfs后处理，保护/run和/tmp目录
+    oci_convert_protect_dirs(man8s_container_info.container_dir_str)
