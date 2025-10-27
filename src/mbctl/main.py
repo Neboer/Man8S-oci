@@ -9,6 +9,7 @@ from mbctl.exec.shell_into_nspawn_container import shell_container
 from mbctl.exec.container_management import remove_container, clear_cache_dir
 from mbctl.exec.get_suffix_address_of_name import print_ipv6_suffix
 from mbctl.utils.man8log import logger
+from mbctl.get_bundle.get_oci import fetch_oci_to_rootfs
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -18,16 +19,16 @@ def build_parser() -> argparse.ArgumentParser:
 	# machines 分组
 	machines = subparsers.add_parser("machines", help="管理机器/容器")
 	machines_sub = machines.add_subparsers(dest="machines_cmd", required=True)
-	# pull 子命令
+	## pull 子命令
 	pull = machines_sub.add_parser("pull", help="将镜像拉取到 nspawn 容器")
 	pull.add_argument("source", help="镜像来源（例如 docker.io/registry）")
 	pull.add_argument("name", help="目标本地容器名称")
 	pull.add_argument("--template",type=str,choices=ContainerTemplateList,default="network_isolated",help="容器模板，默认为 network_isolated")
-	# shell 子命令
+	## shell 子命令
 	shell = machines_sub.add_parser("shell", help="进入容器 shell")
 	shell.add_argument("name", help="容器名称")
 	shell.add_argument("--command", help="替代 shell 的命令", default="/bin/sh")
-	# remove 子命令
+	## remove 子命令
 	remove = machines_sub.add_parser("remove", help="删除容器")
 	remove.add_argument("name", help="要删除的容器名称")
 
@@ -45,6 +46,14 @@ def build_parser() -> argparse.ArgumentParser:
 	cleancache = cache_sub.add_parser("clear", help="清理临时缓存目录")
 	# 添加顶层 version 子命令用于显示版本
 	version = subparsers.add_parser("version", help="显示 mbctl 版本")
+
+	# oci 分组
+	oci = subparsers.add_parser("oci", help="OCI 工具")
+	oci_sub = oci.add_subparsers(dest="oci_cmd", required=True)
+	## fetch 子命令
+	download = oci_sub.add_parser("download", help="将 OCI 镜像拉取到根文件系统")
+	download.add_argument("source", help="镜像来源（例如 docker.io/registry）")
+	download.add_argument("local_path", help="目标本地容器路径（例如 ~/test_container）")
 
 	return parser
 
@@ -79,6 +88,9 @@ def main(argv: Optional[list[str]] = None) -> int:
 	elif args.command_group == "version":
 		print(f"mbctl 版本：{__version__}")
 		return 0
+	elif args.command_group == "oci":
+		if args.oci_cmd == "download":
+			fetch_oci_to_rootfs(args.source, args.local_path)
 	else:
 		parser.print_help()
 		return 2
