@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mbctl"
-version = "0.2.1"
+version = "0.3.0"
 description = "System container orchestration tool for systemd-nspawn containers"
 readme = "README.md"
 license = { text = "Apache-2.0" }

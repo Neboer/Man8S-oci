@@ -70,7 +70,7 @@ def pull_oci_image_and_create_container(
     container_template: ContainerTemplate,
     provided_mount_configs: dict = {},
 ):
-    # 第一步：创建man8s_config
+    # 1：创建man8s_config
 
     ## 首先，需要完成ygg_address的填写。
     ygg_address = string_to_host_ygg_subnet_v6addr(container_name)
@@ -87,12 +87,7 @@ def pull_oci_image_and_create_container(
     if os.path.exists(man8s_container_info.container_dir):
         raise FileExistsError(f"容器 {man8s_container_info.container_dir} 已存在")
 
-    # 拉取镜像并将 rootfs 放置到容器目标目录，返回 config.json 的临时路径
-    oci_config_path = fetch_oci_to_rootfs(
-        oci_image_url, man8s_container_info.container_dir_str
-    )
-
-    # 第二步：获取容器的shallow config，确认容器基本信息，并且获取容器的推荐挂载点，询问用户将这些挂载点挂载到哪里。
+    # 2：获取容器的shallow config，确认容器基本信息，并且获取容器的推荐挂载点，询问用户将这些挂载点挂载到哪里。
     container_shallow_config: OCIShallowConfig = get_container_shallow_config(
         oci_image_url
     )
@@ -110,10 +105,13 @@ def pull_oci_image_and_create_container(
         if mount_target is not None:
             man8s_container_info.add_user_defined_mount_point(mount_point, mount_target)
 
-    # 第二步：创建oci_config
+    # 3：拉取镜像并将 rootfs 放置到容器目标目录，返回OCIConfig。
+    oci_config_path = fetch_oci_to_rootfs(
+        oci_image_url, man8s_container_info.container_dir_str
+    )
     oci_config = OCIConfig(oci_config_path)
 
-    # 第三步：可以生成 envs 配置文件与 nspawn 配置文件了
+    # 4：可以生成 envs 配置文件与 nspawn 配置文件了
     ## 生成 nspawn 配置文件
     nspawn_config = generate_nspawn_config_from_configs(
         oci_config, man8s_container_info
@@ -121,7 +119,7 @@ def pull_oci_image_and_create_container(
     ## 生成 envs 配置文件
     envs_config = generate_env_config_from_configs(oci_config, man8s_container_info)
 
-    # 第四步：将配置文件中自动生成的容器数据挂载点实际创建出来。
+    # 5：将配置文件中自动生成的容器数据挂载点实际创建出来。
 
     ## 首先，创建容器的存储目录与配置目录的基本目录
     os.makedirs(man8s_container_info.get_container_config_path_str())
@@ -142,7 +140,7 @@ def pull_oci_image_and_create_container(
             )
             logger.info(f"已拷贝挂载点中的所有内容 {mount_point} -> {target_path} 。")
 
-    # 第五步：写入 nspawn 和 envs 配置文件到对应位置，创建
+    # 6：写入 nspawn 和 envs 配置文件到对应位置，创建
     nspawn_config.write_to_file(
         man8s_container_info.get_container_nspawn_file_path_str()
     )
@@ -156,20 +154,20 @@ def pull_oci_image_and_create_container(
         f"环境变量配置文件已写入 {man8s_container_info.get_container_man8env_config_path_str()}"
     )
 
-    # 第六步：执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
+    # 7：执行 man8s-add-initsystem ，将 busybox-network-init 系统安装在目标容器中。
     install_init_system_to_machine(man8s_container_info.container_dir_str)
 
     logger.info(
         f"容器 {container_name} 创建完成，根文件系统位于 {man8s_container_info.container_dir_str}"
     )
 
-    # 第七步：在 system_machines_path 下创建指向容器目录的符号链接，正式启用容器。
+    # 8：在 system_machines_path 下创建指向容器目录的符号链接，正式启用容器。
     os.symlink(
         man8s_container_info.container_dir_str,
         os.path.join(config["system_machines_path"], container_name),
     )
 
-    # 第八步：对容器rootfs后处理，保护/run和/tmp目录
+    # 9：对容器rootfs后处理，保护/run和/tmp目录
     protect_dir_result = oci_convert_protect_dirs(
         man8s_container_info.container_dir_str
     )
