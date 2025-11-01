@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/busybox sh
 # A minimal init script for BusyBox-based containers.
 source /sbin/busybox-execute.sh
 source /sbin/busybox-copy-protected-dirs.sh

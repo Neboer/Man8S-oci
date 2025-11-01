@@ -48,18 +48,8 @@ def install_init_system_to_machine(machine_path_str: str) -> None:
 
     # 3. 确保 /bin/sh 指向 busybox 的符号链接
     sh_link = bin_dir / "sh"
-    # 如果存在且不是符号链接，则不覆盖；否则创建符号链接
-    if sh_link.exists():
-        if sh_link.is_symlink():
-            # 如有必要，更新目标
-            current = os.readlink(sh_link)
-            if Path(current).name != "busybox":
-                sh_link.unlink()
-                sh_link.symlink_to("busybox")
-        else:
-            # 已有文件（非符号链接）—为避免破坏性修改，保持原状
-            pass
-    else:
+    # 通常情况下，容器会提供自己的 /bin/sh，如果容器没有提供，则创建一个指向 busybox 的链接。
+    if not sh_link.exists():
         sh_link.symlink_to("busybox")
 
     # 4. 复制 man8lib/busybox-init/* 到 <machine>/sbin

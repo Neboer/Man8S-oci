@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/busybox sh
 source /sbin/busybox-execute.sh
 
 # udhcpc script example
