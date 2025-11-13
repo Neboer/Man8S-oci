@@ -6,7 +6,10 @@ RETRY_INTERVAL_SECONDS=${RETRY_INTERVAL_SECONDS:-1}
 
 # 目标主机
 HOST1="1.1.1.1"
-HOST2="mirrors6.tuna.tsinghua.edu.cn"
+HOST2="mirrors.tuna.tsinghua.edu.cn" # 如果容器有v6，则会解析到v6地址，测试容器的v6。如果容器无v6，则测试v4。
+
+# TODO: 需要增加“如果容器只有v4则不必添加默认IPv6路由”的配置。如果容器没有通过SLAAC自动分配IPv6地址，此脚本也不应该失败，而是应该跳过IPv6子网相关的配置。
+# TODO: 是否允许容器获取各种类型的地址应该是可以配置的，比如 MAN8S_ALLOW_IPV4=true/false, MAN8S_ALLOW_IPV6=true/false。
 
 # 确认 MAN8S_YGGDRASIL_ADDRESS 已设置
 if [ -z "${MAN8S_YGGDRASIL_ADDRESS-}" ]; then
