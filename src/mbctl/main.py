@@ -9,7 +9,7 @@ from mbctl.exec.create_nspawn_container_from_oci_url import (
     pull_oci_image_and_create_container,
 )
 from mbctl.exec.shell_into_nspawn_container import shell_container
-from mbctl.exec.container_management import remove_container, clear_cache_dir
+from mbctl.exec.remove_container import remove_container, clear_cache_dir
 from mbctl.exec.get_suffix_address_of_name import print_ipv6_suffix
 from mbctl.utils.man8log import logger
 from mbctl.get_bundle.get_oci import fetch_oci_to_rootfs
