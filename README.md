@@ -9,6 +9,7 @@ Man8S OCI工具，命令行工具为 mbctl 。
 Man8S环境有所变化，在安装此软件之前，需要做一切必要的准备。
 
 在archlinux中安装如下软件：
+
 ```bash
 pacman -S python yggdrasil skopeo umoci busybox python-pip
 ```
@@ -31,51 +32,65 @@ pacman -S python yggdrasil skopeo umoci busybox python-pip
 mbctl 支持 debug 输出，使用 `mbctl -v` 即可打开debug log，如 `mbctl -v machines pull docker.io/registry:latest Man8Registry`
 
 - 拉取镜像到本地 nspawn 容器：
+
     ```bash
     mbctl machines pull docker.io/registry:latest Man8Registry
     ```
+
     如果容器定义了挂载点，mbctl会询问你是否将此挂载点挂载到某个目标。这个命令必须作用于本地完全没有安装过的容器，如果有配置文件等文件夹则会报错退出。
 
 - 进入容器 shell：
+
     ```bash
     mbctl machines shell Man8Registry
     ```
+
     此命令目前支持进入容器完整namespace环境以及只进入容器网络环境。
+
     ```bash
     sudo mbctl machines shell Man8Registry --network-only -- /usr/bin/iperf3 -s
     ```
+
     用这个方法可以在容器的网络名字空间中执行主机的`iperf3 -s`命令，非常方便。
 
 - 删除一个容器：
+
     ```bash
     mbctl machines remove Man8Registry
     ```
+
     删除容器时会检查容器是否在运行，然后彻底清除容器的所有内容（包括数据与配置文件夹）
 
 - 下载一个容器为rootfs:
+
     ```bash
     mbctl oci download docker.io/registry:latest /var/lib/man8machine
     ```
+
     这个命令不会将man8s-init系统安装到容器中。
 
 - 为路径下的rootfs容器安装man8s init系统
+
     ```bash
     mbctl oci man8init /var/lib/man8machine
     ```
+
     如果路径中已经有man8init系统，则会强制覆盖。注意此命令还是不会检测容器是否在运行。
 
 - 计算容器名字的IPv6后缀：
+
     ```bash
     mbctl address getsuffix SomeFutureMachineName
     ```
 
 - 在命令行中主动前台启动一个容器:
-    ```
+
+    ```bash
     systemd-nspawn -M Man8Registry -D /var/lib/man8machines/Man8Registry
     ```
+
     这个会利用现有的配置启动容器。
     如果在前面加上 `SYSTEMD_LOG_LEVEL=debug` 则会启动debug模式，会输出一些debug日志。
-
 
 ## 镜像配置
 
@@ -85,6 +100,7 @@ nspawn 配置，这里定义的环境变量都是一些无关紧要的环境变�
 所有的容器配置都应该放在 `/var/lib/man8machine_configs` 中，用这些配置就应该可以重建容器本身。
 注意由于idmap，因此容器每次重启之后都会保留之前的旧数据。软件暂时还没有容器状态还原的功能，未来可以考虑借助btrfs的优势实现快照。
 nspawn配置也放在 `/var/lib/man8machine_configs/container.nspawn` 中，留出一个符号链接指向 `/etc/systemd/nspawn/<container_name>.nspawn`
+
 ```ini
 [Exec]
 Boot=no
@@ -110,6 +126,7 @@ Bind=/var/lib/man8machine_configs/TestBWContainer3/etc/bitwarden:/etc/bitwarden:
 ```
 
 man8env.env 这是配置文件的一部分，用来定义容器环境变量。Docker容器的运行大都依赖环境变量传入，因此man8s中环境变量文件也是配置文件的一部分。
+
 ```bash
 MAN8S_CONTAINER_NAME=TestBWContainer3
 MAN8S_CONTAINER_TEMPLATE=netns-init
@@ -164,6 +181,7 @@ mbctl 使用 docker、busybox 作为依赖。
 ### Man8S 网络配置
 
 Man8S的内网地址分为两种：
+
 - 动态DHCP/SLAAC分配IPv4/IPv6地址
 - 由容器名哈希与主机前缀静态配置的ygg 300:: 地址
 
@@ -181,6 +199,7 @@ Man8S的内网地址分为两种：
 容器启动前需要做一些准备工作，配置好自己的环境变量和网络地址，并确保所有的网络地址和环境变量正确配置，才能正式启动应用。
 
 init过程总体分如下几步：
+
 1. 加载helper函数
 2. 加载环境变量配置
 3. 将受保护的文件夹中的内容拷贝到/tmp等文件夹下
@@ -230,7 +249,7 @@ init过程总体分如下几步：
 
 但这并不是结束。实际上KillSignal设置成SIGTERM是不对的，Kill应该是SIGKILL，stop才是SIGTERM。通过KillSignal管理容器的生命周期是不足够的，还应该设置容器的StopSignal才对。这样才可以确保在关机时运行中的容器可以一个个正常关闭，而不是等到超时被kill，使用的kill signal还不正确，这太离谱了。
 
-不过根据这个issue， https://github.com/systemd/systemd/issues/21918 systemd-nspawn并不打算支持可配置的stop signal。因此，既然没有什么大问题，还是尽量用PID=2来部署服务比较好。man8s部署服务会尽量使用PID2，也就是“接管配置（容器使用不合格的init）”配置，因为无论容器中运行的init是否合格，它都不会响应machinectl的命令，而这完全是systemd要求行为。
+不过根据这个issue， <https://github.com/systemd/systemd/issues/21918> systemd-nspawn并不打算支持可配置的stop signal。因此，既然没有什么大问题，还是尽量用PID=2来部署服务比较好。man8s部署服务会尽量使用PID2，也就是“接管配置（容器使用不合格的init）”配置，因为无论容器中运行的init是否合格，它都不会响应machinectl的命令，而这完全是systemd要求行为。
 
 对于 s6-overlay ，s6-overlay 强行要求自己一定要以PID=1运行，并且拒绝提供任何workaround，我们也完全没有办法解决这个问题。我个人的建议是如果可以则不要启动s6-supervisor的init，建议用PID=2直接启动容器需要启动的那个主进程，跳过其他的问题。
 
